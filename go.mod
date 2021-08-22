@@ -1,10 +1,12 @@
-module github.com/alejmendez/irisApiRest
+module github.com/alejmendez/goApiRest
 
 go 1.16
 
 require (
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
-	github.com/iris-contrib/middleware/cors v0.0.0-20210110101738-6d0a4d799b5d // indirect
-	github.com/iris-contrib/middleware/jwt v0.0.0-20210110101738-6d0a4d799b5d // indirect
-	github.com/kataras/iris/v12 v12.2.0-alpha2.0.20210717090056-b2cc3a287149 // indirect
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/gofiber/fiber/v2 v2.17.0
+	github.com/gofiber/jwt/v2 v2.2.6
+	github.com/jinzhu/gorm v1.9.16
+	github.com/joho/godotenv v1.3.0
+	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
 )

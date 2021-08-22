@@ -1,18 +1,24 @@
 package main
 
 import (
-	"os"
+	"log"
 
-	"github.com/kataras/iris/v12"
+	"github.com/alejmendez/goApiRest/database"
+	"github.com/alejmendez/goApiRest/router"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
 func main() {
-	port := os.Getenv("PORT")
+	app := fiber.New()
+	app.Use(cors.New())
 
-	if port == "" {
-		port = "8080"
-	}
+	database.ConnectDB()
 
-	app := newApp()
-	app.Run(iris.Addr(":"+port), iris.WithoutServerError(iris.ErrServerClosed))
+	router.SetupRoutes(app)
+	log.Fatal(app.Listen(":3000"))
+
+	defer database.DB.Close()
 }
