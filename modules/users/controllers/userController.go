@@ -1,49 +1,14 @@
-package handler
+package controllers
 
 import (
-	"strconv"
-
-	"github.com/alejmendez/goApiRest/database"
-	"github.com/alejmendez/goApiRest/model"
+	"github.com/alejmendez/goApiRest/core/database"
+	model "github.com/alejmendez/goApiRest/modules/users/models"
+	userService "github.com/alejmendez/goApiRest/modules/users/services"
+	"github.com/alejmendez/goApiRest/modules/users/utils"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"
-	"golang.org/x/crypto/bcrypt"
 )
-
-func hashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
-}
-
-func validToken(t *jwt.Token, id string) bool {
-	n, err := strconv.Atoi(id)
-	if err != nil {
-		return false
-	}
-
-	claims := t.Claims.(jwt.MapClaims)
-	uid := int(claims["user_id"].(float64))
-
-	if uid != n {
-		return false
-	}
-
-	return true
-}
-
-func validUser(id string, p string) bool {
-	db := database.DB
-	var user model.User
-	db.First(&user, id)
-	if user.Username == "" {
-		return false
-	}
-	if !CheckPasswordHash(p, user.Password) {
-		return false
-	}
-	return true
-}
 
 // GetUser get a user
 func GetUser(c *fiber.Ctx) error {
@@ -72,7 +37,7 @@ func CreateUser(c *fiber.Ctx) error {
 
 	}
 
-	hash, err := hashPassword(user.Password)
+	hash, err := utils.HashPassword(user.Password)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Couldn't hash password", "data": err})
 
@@ -94,7 +59,9 @@ func CreateUser(c *fiber.Ctx) error {
 // UpdateUser update user
 func UpdateUser(c *fiber.Ctx) error {
 	type UpdateUserInput struct {
-		Names string `json:"names"`
+		Username string `json:"username"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
 	}
 	var uui UpdateUserInput
 	if err := c.BodyParser(&uui); err != nil {
@@ -103,7 +70,7 @@ func UpdateUser(c *fiber.Ctx) error {
 	id := c.Params("id")
 	token := c.Locals("user").(*jwt.Token)
 
-	if !validToken(token, id) {
+	if !userService.ValidToken(token, id) {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Invalid token id", "data": nil})
 	}
 
@@ -111,7 +78,9 @@ func UpdateUser(c *fiber.Ctx) error {
 	var user model.User
 
 	db.First(&user, id)
-	user.Names = uui.Names
+	user.Username = uui.Username
+	user.Email = uui.Email
+	user.Password = uui.Password
 	db.Save(&user)
 
 	return c.JSON(fiber.Map{"status": "success", "message": "User successfully updated", "data": user})
@@ -129,14 +98,12 @@ func DeleteUser(c *fiber.Ctx) error {
 	id := c.Params("id")
 	token := c.Locals("user").(*jwt.Token)
 
-	if !validToken(token, id) {
+	if !userService.ValidToken(token, id) {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Invalid token id", "data": nil})
-
 	}
 
-	if !validUser(id, pi.Password) {
+	if !userService.ValidUser(id, pi.Password) {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Not valid user", "data": nil})
-
 	}
 
 	db := database.DB

@@ -1,14 +1,12 @@
 package model
 
 import (
-	"github.com/jinzhu/gorm"
+	"github.com/alejmendez/goApiRest/core/database"
 )
 
-// User struct
 type User struct {
-	gorm.Model
+	database.ModelBase
 	Username string `gorm:"unique_index;not null" json:"username"`
 	Email    string `gorm:"unique_index;not null" json:"email"`
 	Password string `gorm:"not null" json:"password"`
-	Names    string `json:"names"`
 }

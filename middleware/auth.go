@@ -1,16 +1,16 @@
 package middleware
 
 import (
-	"github.com/alejmendez/goApiRest/config"
+	"github.com/alejmendez/goApiRest/core/config"
 
 	"github.com/gofiber/fiber/v2"
-	jwtware "github.com/gofiber/jwt/v2"
+	jwt "github.com/gofiber/jwt/v2"
 )
 
 // Protected protect routes
 func Protected() fiber.Handler {
-	return jwtware.New(jwtware.Config{
-		SigningKey:   []byte(config.Config("SECRET")),
+	return jwt.New(jwt.Config{
+		SigningKey:   []byte(config.Get("JWT_SECRET")),
 		ErrorHandler: jwtError,
 	})
 }
