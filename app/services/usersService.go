@@ -3,9 +3,9 @@ package services
 import (
 	"strconv"
 
+	model "github.com/alejmendez/goApiRest/app/models"
+	"github.com/alejmendez/goApiRest/app/utils"
 	"github.com/alejmendez/goApiRest/core/database"
-	model "github.com/alejmendez/goApiRest/modules/users/models"
-	"github.com/alejmendez/goApiRest/modules/users/utils"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jinzhu/gorm"
@@ -33,11 +33,7 @@ func ValidToken(t *jwt.Token, id string) bool {
 	claims := t.Claims.(jwt.MapClaims)
 	uid := int(claims["user_id"].(float64))
 
-	if uid != n {
-		return false
-	}
-
-	return true
+	return uid == n
 }
 
 func GetUserByEmail(e string) (*model.User, error) {

@@ -8,10 +8,10 @@ import (
 )
 
 type ModelBase struct {
-	ID        string `gorm:"unique_index;not null" json:"id"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt *time.Time `sql:"index"`
+	ID        string     `gorm:"unique_index;not null" json:"id"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
+	DeletedAt *time.Time `sql:"index" json:"deleted_at"`
 }
 
 func (base *ModelBase) BeforeCreate(scope *gorm.Scope) error {

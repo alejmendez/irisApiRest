@@ -7,10 +7,12 @@ import (
 
 	"github.com/alejmendez/goApiRest/core/config"
 	"github.com/alejmendez/goApiRest/core/database"
-	"github.com/alejmendez/goApiRest/modules"
+	"github.com/alejmendez/goApiRest/router"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
@@ -42,13 +44,34 @@ func GetDB() *gorm.DB {
 }
 
 func (s *Server) Start() {
-	s.app = fiber.New()
+	s.app = fiber.New(fiber.Config{
+		// Override default error handler
+		ErrorHandler: func(ctx *fiber.Ctx, err error) error {
+			// Status code defaults to 500
+			code := fiber.StatusInternalServerError
+
+			// Retrieve the custom status code if it's an fiber.*Error
+			if e, ok := err.(*fiber.Error); ok {
+				code = e.Code
+			}
+
+			// Send custom error page
+			fmt.Println(err)
+			err = ctx.Status(code).JSON(fiber.Map{"status": "error", "message": err.Error()})
+			if err != nil {
+				// In case the SendFile fails
+				return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": "error", "message": "Internal Server Error"})
+			}
+
+			// Return from handler
+			return nil
+		},
+	})
+
 	s.InitMiddlewares()
+	s.InitRouter()
 
 	s.ConnectDB()
-
-	modules.InitializeModules(s.app)
-
 	s.Listen()
 }
 
@@ -58,6 +81,12 @@ func (s *Server) ConnectDB() {
 
 func (s *Server) InitMiddlewares() {
 	s.app.Use(cors.New())
+	s.app.Use(compress.New())
+	s.app.Use(recover.New())
+}
+
+func (s *Server) InitRouter() {
+	router.SetupRoutes(s.app)
 }
 
 func (s *Server) Listen() {

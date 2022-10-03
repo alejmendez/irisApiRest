@@ -1,10 +1,10 @@
 package controllers
 
 import (
+	model "github.com/alejmendez/goApiRest/app/models"
+	userService "github.com/alejmendez/goApiRest/app/services"
+	"github.com/alejmendez/goApiRest/app/utils"
 	"github.com/alejmendez/goApiRest/core/database"
-	model "github.com/alejmendez/goApiRest/modules/users/models"
-	userService "github.com/alejmendez/goApiRest/modules/users/services"
-	"github.com/alejmendez/goApiRest/modules/users/utils"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"

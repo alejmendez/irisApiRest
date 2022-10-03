@@ -5,6 +5,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func Version(c *fiber.Ctx) error {
+func Health(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"version": config.Get("APP_VERSION")})
 }

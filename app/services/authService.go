@@ -4,38 +4,37 @@ import (
 	"errors"
 	"time"
 
+	"github.com/alejmendez/goApiRest/app/dto"
+	"github.com/alejmendez/goApiRest/app/utils"
 	"github.com/alejmendez/goApiRest/core/config"
-	dtoUser "github.com/alejmendez/goApiRest/modules/users/dto"
-	userService "github.com/alejmendez/goApiRest/modules/users/services"
-	"github.com/alejmendez/goApiRest/modules/users/utils"
 	"github.com/dgrijalva/jwt-go"
 )
 
 func GenerateToken(identity, password string) (string, error) {
-	var ud dtoUser.UserDto
-	email, err := userService.GetUserByEmail(identity)
+	var ud dto.UserDto
+	email, err := GetUserByEmail(identity)
 	if err != nil {
-		return "", errors.New("Error on email")
+		return "", errors.New("error on email")
 	}
 
-	user, err := userService.GetUserByUsername(identity)
+	user, err := GetUserByUsername(identity)
 	if err != nil {
-		return "", errors.New("Error on username")
+		return "", errors.New("error on username")
 	}
 
 	if email == nil && user == nil {
-		return "", errors.New("User not found")
+		return "", errors.New("ser not found")
 	}
 
 	if email == nil {
-		ud = dtoUser.UserDto{
+		ud = dto.UserDto{
 			ID:       user.ID,
 			Username: user.Username,
 			Email:    user.Email,
 			Password: user.Password,
 		}
 	} else {
-		ud = dtoUser.UserDto{
+		ud = dto.UserDto{
 			ID:       email.ID,
 			Username: email.Username,
 			Email:    email.Email,
@@ -44,7 +43,7 @@ func GenerateToken(identity, password string) (string, error) {
 	}
 
 	if !utils.CheckPasswordHash(password, ud.Password) {
-		return "", errors.New("Invalid password")
+		return "", errors.New("invalid password")
 	}
 
 	token := jwt.New(jwt.SigningMethodHS256)
@@ -56,7 +55,7 @@ func GenerateToken(identity, password string) (string, error) {
 
 	t, err := token.SignedString([]byte(config.Get("JWT_SECRET")))
 	if err != nil {
-		return "", errors.New("Error internal")
+		return "", errors.New("error internal")
 	}
 
 	return t, nil
