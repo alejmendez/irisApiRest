@@ -10,7 +10,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-func GenerateToken(identity, password string) (string, error) {
+func GenerateToken(identity string, password string) (string, error) {
 	var ud dto.UserDto
 	email, err := GetUserByEmail(identity)
 	if err != nil {
@@ -53,7 +53,7 @@ func GenerateToken(identity, password string) (string, error) {
 	claims["user_id"] = ud.ID
 	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
 
-	t, err := token.SignedString([]byte(config.Get("JWT_SECRET")))
+	t, err := token.SignedString([]byte(config.Conf.JwtSecret))
 	if err != nil {
 		return "", errors.New("error internal")
 	}

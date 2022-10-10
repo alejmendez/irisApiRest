@@ -6,5 +6,5 @@ import (
 )
 
 func Health(c *fiber.Ctx) error {
-	return c.JSON(fiber.Map{"version": config.Get("APP_VERSION")})
+	return c.JSON(fiber.Map{"version": config.Conf.AppVersion})
 }

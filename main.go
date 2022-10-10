@@ -5,8 +5,7 @@ import (
 )
 
 func main() {
-	app := core.GetServerInstance()
-	app.Start()
+	app, _ := core.NewServer()
 
 	defer app.Close()
 }

@@ -13,9 +13,8 @@ import (
 // GetUser get a user
 func GetUser(c *fiber.Ctx) error {
 	id := c.Params("id")
-	db := database.DB
 	var user model.User
-	db.Find(&user, id)
+	database.DBConn.Find(&user, id)
 	if user.Username == "" {
 		return c.Status(404).JSON(fiber.Map{"status": "error", "message": "No user found with ID", "data": nil})
 	}
@@ -28,8 +27,6 @@ func CreateUser(c *fiber.Ctx) error {
 		Username string `json:"username"`
 		Email    string `json:"email"`
 	}
-
-	db := database.DB
 
 	user := new(model.User)
 	if err := c.BodyParser(user); err != nil {
@@ -44,7 +41,7 @@ func CreateUser(c *fiber.Ctx) error {
 	}
 
 	user.Password = hash
-	if err := db.Create(&user).Error; err != nil {
+	if err := database.DBConn.Create(&user).Error; err != nil {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Couldn't create user", "data": err})
 	}
 
@@ -74,14 +71,13 @@ func UpdateUser(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Invalid token id", "data": nil})
 	}
 
-	db := database.DB
 	var user model.User
 
-	db.First(&user, id)
+	database.DBConn.First(&user, id)
 	user.Username = uui.Username
 	user.Email = uui.Email
 	user.Password = uui.Password
-	db.Save(&user)
+	database.DBConn.Save(&user)
 
 	return c.JSON(fiber.Map{"status": "success", "message": "User successfully updated", "data": user})
 }
@@ -106,11 +102,10 @@ func DeleteUser(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Not valid user", "data": nil})
 	}
 
-	db := database.DB
 	var user model.User
 
-	db.First(&user, id)
+	database.DBConn.First(&user, id)
 
-	db.Delete(&user)
+	database.DBConn.Delete(&user)
 	return c.JSON(fiber.Map{"status": "success", "message": "User successfully deleted", "data": nil})
 }

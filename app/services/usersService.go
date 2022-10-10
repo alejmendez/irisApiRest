@@ -12,9 +12,8 @@ import (
 )
 
 func ValidUser(id string, p string) bool {
-	db := database.DB
 	var user model.User
-	db.First(&user, id)
+	database.DBConn.First(&user, id)
 	if user.Username == "" {
 		return false
 	}
@@ -37,9 +36,8 @@ func ValidToken(t *jwt.Token, id string) bool {
 }
 
 func GetUserByEmail(e string) (*model.User, error) {
-	db := database.DB
 	var user model.User
-	if err := db.Where(&model.User{Email: e}).Find(&user).Error; err != nil {
+	if err := database.DBConn.Where(&model.User{Email: e}).Find(&user).Error; err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			return nil, nil
 		}
@@ -49,9 +47,8 @@ func GetUserByEmail(e string) (*model.User, error) {
 }
 
 func GetUserByUsername(u string) (*model.User, error) {
-	db := database.DB
 	var user model.User
-	if err := db.Where(&model.User{Username: u}).Find(&user).Error; err != nil {
+	if err := database.DBConn.Where(&model.User{Username: u}).Find(&user).Error; err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			return nil, nil
 		}
