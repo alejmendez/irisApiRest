@@ -1,25 +1,37 @@
 package middleware
 
 import (
-	"github.com/alejmendez/goApiRest/core/config"
+	"strings"
+
+	"github.com/alejmendez/goApiRest/app/utils/jwt"
 
 	"github.com/gofiber/fiber/v2"
-	jwt "github.com/gofiber/jwt/v2"
 )
 
-// Protected protect routes
-func Protected() fiber.Handler {
-	return jwt.New(jwt.Config{
-		SigningKey:   []byte(config.Conf.JwtSecret),
-		ErrorHandler: jwtError,
-	})
-}
+func Auth(c *fiber.Ctx) error {
+	h := c.Get("Authorization")
 
-func jwtError(c *fiber.Ctx, err error) error {
-	if err.Error() == "Missing or malformed JWT" {
-		return c.Status(fiber.StatusBadRequest).
-			JSON(fiber.Map{"status": "error", "message": "Missing or malformed JWT", "data": nil})
+	if h == "" {
+		return fiber.ErrUnauthorized
 	}
-	return c.Status(fiber.StatusUnauthorized).
-		JSON(fiber.Map{"status": "error", "message": "Invalid or expired JWT", "data": nil})
+
+	// Spliting the header
+	chunks := strings.Split(h, " ")
+
+	// If header signature is not like `Bearer <token>`, then throw
+	// This is also required, otherwise chunks[1] will throw out of bound error
+	if len(chunks) < 2 {
+		return fiber.ErrUnauthorized
+	}
+
+	// Verify the token which is in the chunks
+	user, err := jwt.Verify(chunks[1])
+
+	if err != nil {
+		return fiber.ErrUnauthorized
+	}
+
+	c.Locals("USER", user.ID)
+
+	return c.Next()
 }

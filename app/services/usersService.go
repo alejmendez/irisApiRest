@@ -1,58 +1,50 @@
 package services
 
 import (
-	"strconv"
-
 	model "github.com/alejmendez/goApiRest/app/models"
-	"github.com/alejmendez/goApiRest/app/utils"
-	"github.com/alejmendez/goApiRest/core/database"
-
-	"github.com/dgrijalva/jwt-go"
-	"github.com/jinzhu/gorm"
+	"github.com/alejmendez/goApiRest/app/repositories"
+	"github.com/alejmendez/goApiRest/app/utils/password"
 )
 
-func ValidUser(id string, p string) bool {
-	var user model.User
-	database.DBConn.First(&user, id)
-	if user.Username == "" {
-		return false
-	}
-	if !utils.CheckPasswordHash(p, user.Password) {
-		return false
-	}
-	return true
+type UserService interface {
+	Valid(id string, pass string) bool
+	Get(id string) (*model.User, error)
+	Create(user *model.User) (*model.User, error)
+	Update(id string, userParam *model.User) (*model.User, error)
+	Delete(id string) (bool, error)
 }
 
-func ValidToken(t *jwt.Token, id string) bool {
-	n, err := strconv.Atoi(id)
-	if err != nil {
+type userService struct {
+	repository repositories.UserRepository
+}
+
+func NewUserService(repo repositories.UserRepository) UserService {
+	return &userService{
+		repository: repo,
+	}
+}
+
+func (uS *userService) Valid(id string, pass string) bool {
+	user, err := uS.repository.Find(id)
+	if err != nil || user == nil {
 		return false
 	}
 
-	claims := t.Claims.(jwt.MapClaims)
-	uid := int(claims["user_id"].(float64))
-
-	return uid == n
+	return password.Verify(pass, user.Password)
 }
 
-func GetUserByEmail(e string) (*model.User, error) {
-	var user model.User
-	if err := database.DBConn.Where(&model.User{Email: e}).Find(&user).Error; err != nil {
-		if gorm.IsRecordNotFoundError(err) {
-			return nil, nil
-		}
-		return nil, err
-	}
-	return &user, nil
+func (uS *userService) Get(id string) (*model.User, error) {
+	return uS.repository.Find(id)
 }
 
-func GetUserByUsername(u string) (*model.User, error) {
-	var user model.User
-	if err := database.DBConn.Where(&model.User{Username: u}).Find(&user).Error; err != nil {
-		if gorm.IsRecordNotFoundError(err) {
-			return nil, nil
-		}
-		return nil, err
-	}
-	return &user, nil
+func (uS *userService) Create(user *model.User) (*model.User, error) {
+	return uS.repository.Create(user)
+}
+
+func (uS *userService) Update(id string, userParam *model.User) (*model.User, error) {
+	return uS.repository.Update(id, userParam)
+}
+
+func (uS *userService) Delete(id string) (bool, error) {
+	return uS.repository.Delete(id)
 }

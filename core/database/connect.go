@@ -2,27 +2,26 @@ package database
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/alejmendez/goApiRest/core/config"
 	"github.com/jinzhu/gorm"
 )
 
 var (
-	DBConn *gorm.DB
+	DB *gorm.DB
 )
 
 // ConnectDB connect to db
 func ConnectDB() *gorm.DB {
-	var err error
-
-	// fmt.Println(GetConnectionString())
+	// log.Println(GetConnectionString())
 	db, err := gorm.Open("postgres", GetConnectionString())
 	if err != nil {
 		panic("failed to connect database")
 	}
 
-	fmt.Println("Connection Opened to Database")
-	DBConn = db
+	log.Println("Connection Opened to Database")
+	DB = db
 	return db
 }
 

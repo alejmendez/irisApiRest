@@ -5,6 +5,20 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func Health(c *fiber.Ctx) error {
-	return c.JSON(fiber.Map{"version": config.Conf.AppVersion})
+func NewHealthController(conf *config.Config) HealthController {
+	return &healthController{
+		Conf: conf,
+	}
+}
+
+type HealthController interface {
+	Get(ctx *fiber.Ctx) error
+}
+
+type healthController struct {
+	Conf *config.Config
+}
+
+func (c *healthController) Get(ctx *fiber.Ctx) error {
+	return ctx.JSON(fiber.Map{"version": c.Conf.AppVersion})
 }

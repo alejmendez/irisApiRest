@@ -1,13 +1,14 @@
 package core
 
 import (
-	"fmt"
 	"log"
 
+	"github.com/alejmendez/goApiRest/app/utils"
 	"github.com/alejmendez/goApiRest/core/config"
 	"github.com/alejmendez/goApiRest/core/database"
 	"github.com/alejmendez/goApiRest/database/migration"
 	"github.com/alejmendez/goApiRest/router"
+	"github.com/joho/godotenv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
@@ -18,35 +19,9 @@ import (
 )
 
 type Server struct {
-	app  *fiber.App
+	App  *fiber.App
 	DB   *gorm.DB
-	conf *config.Config
-}
-
-func fiberConfig() fiber.Config {
-	return fiber.Config{
-		// Override default error handler
-		ErrorHandler: func(ctx *fiber.Ctx, err error) error {
-			// Status code defaults to 500
-			code := fiber.StatusInternalServerError
-
-			// Retrieve the custom status code if it's an fiber.*Error
-			if e, ok := err.(*fiber.Error); ok {
-				code = e.Code
-			}
-
-			// Send custom error page
-			fmt.Println(err)
-			err = ctx.Status(code).JSON(fiber.Map{"status": "error", "message": err.Error()})
-			if err != nil {
-				// In case the SendFile fails
-				return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": "error", "message": "Internal Server Error"})
-			}
-
-			// Return from handler
-			return nil
-		},
-	}
+	Conf *config.Config
 }
 
 func NewServer() (*Server, error) {
@@ -57,28 +32,35 @@ func NewServer() (*Server, error) {
 }
 
 func (s *Server) Start() {
-	s.app = fiber.New(fiberConfig())
+	s.InitConfig()
+	s.ConnectDB()
+
+	s.App = fiber.New(fiber.Config{
+		ErrorHandler: utils.ErrorHandler,
+	})
 
 	s.InitMiddlewares()
 	s.InitRouter()
-	s.InitConfig()
 
-	s.ConnectDB()
 	s.Listen()
 }
 
 func (s *Server) InitMiddlewares() {
-	s.app.Use(cors.New())
-	s.app.Use(compress.New())
-	s.app.Use(recover.New())
+	s.App.Use(cors.New())
+	s.App.Use(compress.New())
+	s.App.Use(recover.New())
 }
 
 func (s *Server) InitRouter() {
-	router.SetupRoutes(s.app)
+	router.SetupRoutes(s.App, s.Conf, s.DB)
 }
 
 func (s *Server) InitConfig() {
-	s.conf, _ = config.InitConfig()
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Print("Error loading .env file")
+	}
+	s.Conf, _ = config.InitConfig()
 }
 
 func (s *Server) ConnectDB() {
@@ -87,8 +69,8 @@ func (s *Server) ConnectDB() {
 }
 
 func (s *Server) Listen() {
-	port := s.conf.AppPort
-	log.Fatal(s.app.Listen(fmt.Sprintf(":%s", port)))
+	port := s.Conf.AppPort
+	log.Fatal(s.App.Listen(":" + port))
 }
 
 func (s *Server) Close() {

@@ -1,10 +1,7 @@
 package config
 
 import (
-	"fmt"
 	"os"
-
-	"github.com/joho/godotenv"
 )
 
 var (
@@ -12,10 +9,11 @@ var (
 )
 
 type Config struct {
-	AppVersion string
-	JwtSecret  string
-	AppPort    string
-	Db         *ConfigDatabase
+	AppVersion   string
+	JwtSecret    string
+	JwtExpiresIn string
+	AppPort      string
+	Db           *ConfigDatabase
 }
 
 type ConfigDatabase struct {
@@ -27,10 +25,11 @@ type ConfigDatabase struct {
 }
 
 func InitConfig() (*Config, error) {
-	Conf := &Config{
-		AppVersion: getEnvValue("APP_VERSION"),
-		JwtSecret:  getEnvValue("JWT_SECRET"),
-		AppPort:    getEnvValue("APP_PORT"),
+	Config := &Config{
+		AppVersion:   getEnvValue("APP_VERSION"),
+		JwtSecret:    getEnvValue("JWT_SECRET"),
+		JwtExpiresIn: getEnvValue("JWT_EXPIRES_IN"),
+		AppPort:      getEnvValue("APP_PORT"),
 		Db: &ConfigDatabase{
 			Host:     getEnvValue("DB_HOST"),
 			Port:     getEnvValue("DB_PORT"),
@@ -40,13 +39,10 @@ func InitConfig() (*Config, error) {
 		},
 	}
 
-	return Conf, nil
+	Conf = Config
+	return Config, nil
 }
 
 func getEnvValue(key string) string {
-	err := godotenv.Load(".env")
-	if err != nil {
-		fmt.Print("Error loading .env file")
-	}
 	return os.Getenv(key)
 }

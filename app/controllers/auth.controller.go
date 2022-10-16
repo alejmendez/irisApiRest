@@ -7,21 +7,33 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+func NewAuthController(service services.AuthServices) AuthController {
+	return &authController{
+		Service: service,
+	}
+}
+
+type AuthController interface {
+	Login(ctx *fiber.Ctx) error
+}
+
+type authController struct {
+	Service services.AuthServices
+}
+
 // Login get user and password
-func Login(c *fiber.Ctx) error {
+func (c *authController) Login(ctx *fiber.Ctx) error {
 	var input dto.LoginDto
 
-	if err := c.BodyParser(&input); err != nil {
+	if err := ctx.BodyParser(&input); err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "Error on login request")
 	}
-	identity := input.Identity
-	pass := input.Password
 
-	token, err := services.GenerateToken(identity, pass)
+	token, err := c.Service.GenerateToken(input.Email, input.Password)
 
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
-	return c.JSON(fiber.Map{"status": "success", "message": "Success login", "data": token})
+	return ctx.JSON(fiber.Map{"token": token})
 }
