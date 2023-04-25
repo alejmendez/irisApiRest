@@ -3,7 +3,7 @@ package services
 import (
 	model "github.com/alejmendez/goApiRest/app/models"
 	"github.com/alejmendez/goApiRest/app/repositories"
-	"github.com/alejmendez/goApiRest/app/utils/password"
+	"github.com/alejmendez/goApiRest/app/utils"
 )
 
 type UserService interface {
@@ -30,7 +30,7 @@ func (uS *userService) Valid(id string, pass string) bool {
 		return false
 	}
 
-	return password.Verify(pass, user.Password)
+	return utils.VerifyHash(pass, user.Password)
 }
 
 func (uS *userService) Get(id string) (*model.User, error) {

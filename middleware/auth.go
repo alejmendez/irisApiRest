@@ -3,8 +3,7 @@ package middleware
 import (
 	"strings"
 
-	"github.com/alejmendez/goApiRest/app/utils/jwt"
-
+	"github.com/alejmendez/goApiRest/app/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -25,7 +24,7 @@ func Auth(c *fiber.Ctx) error {
 	}
 
 	// Verify the token which is in the chunks
-	user, err := jwt.Verify(chunks[1])
+	user, err := utils.JwtVerify(chunks[1])
 
 	if err != nil {
 		return fiber.ErrUnauthorized

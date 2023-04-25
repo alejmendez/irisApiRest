@@ -37,9 +37,6 @@ func responseUser(user *model.User) *dto.UserResponse {
 // GetUser get a user
 func (c *userController) Get(ctx *fiber.Ctx) error {
 	id := ctx.Params("id")
-	if !utils.IsValidUUID(id) {
-		return fiber.NewError(fiber.StatusNotFound, "No user found with ID")
-	}
 	user, err := c.sevice.Get(id)
 
 	if err != nil {
@@ -74,9 +71,6 @@ func (c *userController) Create(ctx *fiber.Ctx) error {
 // UpdateUser update user
 func (c *userController) Update(ctx *fiber.Ctx) error {
 	id := ctx.Params("id")
-	if !utils.IsValidUUID(id) {
-		return fiber.NewError(fiber.StatusNotFound, "No user found with ID")
-	}
 	userRequest := new(dto.UserUpdateRequest)
 
 	if err := utils.ParseBodyAndValidate(ctx, userRequest); err != nil {
@@ -100,10 +94,6 @@ func (c *userController) Update(ctx *fiber.Ctx) error {
 // DeleteUser delete user
 func (c *userController) Delete(ctx *fiber.Ctx) error {
 	id := ctx.Params("id")
-	if !utils.IsValidUUID(id) {
-		return fiber.NewError(fiber.StatusNotFound, "No user found with ID")
-	}
-
 	success, err := c.sevice.Delete(id)
 
 	if err != nil {

@@ -1,9 +1,9 @@
-package password
+package utils
 
 import "golang.org/x/crypto/bcrypt"
 
 // Generate return a hashed password
-func Generate(raw string) string {
+func GenerateHash(raw string) string {
 	hash, err := bcrypt.GenerateFromPassword([]byte(raw), 10)
 
 	if err != nil {
@@ -14,7 +14,7 @@ func Generate(raw string) string {
 }
 
 // Verify compares a hashed password with plaintext password
-func Verify(hash string, raw string) bool {
+func VerifyHash(hash string, raw string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(raw))
 	return err == nil
 }

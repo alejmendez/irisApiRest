@@ -2,7 +2,7 @@ package repositories
 
 import (
 	model "github.com/alejmendez/goApiRest/app/models"
-	"github.com/alejmendez/goApiRest/app/utils/password"
+	"github.com/alejmendez/goApiRest/app/utils"
 	"github.com/jinzhu/gorm"
 )
 
@@ -49,15 +49,16 @@ func (uR *userRepository) FindByWhere(userW *model.User) (*model.User, error) {
 }
 
 func (uR *userRepository) FindByEmail(email string) (*model.User, error) {
-	return uR.FindByWhere(&model.User{ID: email})
+	return uR.FindByWhere(&model.User{Email: email})
 }
 
 func (uR *userRepository) Find(id string) (*model.User, error) {
-	return uR.FindByWhere(&model.User{ID: id})
+	i, _ := utils.StringToUint(id)
+	return uR.FindByWhere(&model.User{ID: i})
 }
 
 func (uR *userRepository) Create(user *model.User) (*model.User, error) {
-	user.Password = password.Generate(user.Password)
+	user.Password = utils.GenerateHash(user.Password)
 
 	if err := uR.Db.Create(&user).Error; err != nil {
 		return nil, err
@@ -77,7 +78,7 @@ func (uR *userRepository) Update(id string, userParam *model.User) (*model.User,
 	user.Email = userParam.Email
 
 	if user.Password != "" {
-		user.Password = password.Generate(user.Password)
+		user.Password = utils.GenerateHash(user.Password)
 	}
 
 	if err := uR.Db.Save(&userParam).Error; err != nil {

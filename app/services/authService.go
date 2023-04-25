@@ -4,8 +4,7 @@ import (
 	"errors"
 
 	"github.com/alejmendez/goApiRest/app/repositories"
-	"github.com/alejmendez/goApiRest/app/utils/jwt"
-	"github.com/alejmendez/goApiRest/app/utils/password"
+	"github.com/alejmendez/goApiRest/app/utils"
 )
 
 func NewAuthService(repo repositories.UserRepository) AuthServices {
@@ -28,11 +27,11 @@ func (aS *authServices) GenerateToken(email string, pass string) (string, error)
 		return "", errors.New("user not found")
 	}
 
-	if !password.Verify(pass, user.Password) {
+	if !utils.VerifyHash(pass, user.Password) {
 		return "", errors.New("invalid password")
 	}
 
-	token := jwt.Generate(&jwt.TokenPayload{
+	token := utils.JwtGenerate(&utils.TokenPayload{
 		ID: user.ID,
 	})
 

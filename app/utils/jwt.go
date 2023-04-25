@@ -1,6 +1,7 @@
-package jwt
+package utils
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -11,11 +12,11 @@ import (
 
 // TokenPayload defines the payload for the token
 type TokenPayload struct {
-	ID string
+	ID uint
 }
 
 // Generate generates the jwt token based on payload
-func Generate(payload *TokenPayload) string {
+func JwtGenerate(payload *TokenPayload) string {
 	v, err := time.ParseDuration(config.Conf.JwtExpiresIn)
 
 	if err != nil {
@@ -36,7 +37,7 @@ func Generate(payload *TokenPayload) string {
 	return token
 }
 
-func parse(token string) (*jwt.Token, error) {
+func JwtParse(token string) (*jwt.Token, error) {
 	// Parse takes the token string and a function for looking up the key. The latter is especially
 	// useful if you use multiple keys for your application.  The standard is to use 'kid' in the
 	// head of the token to identify which key to use, but the parsed token (head and claims) is provided
@@ -53,8 +54,8 @@ func parse(token string) (*jwt.Token, error) {
 }
 
 // Verify verifies the jwt token against the secret
-func Verify(token string) (*TokenPayload, error) {
-	parsed, err := parse(token)
+func JwtVerify(token string) (*TokenPayload, error) {
+	parsed, err := JwtParse(token)
 
 	if err != nil {
 		return nil, err
@@ -67,7 +68,10 @@ func Verify(token string) (*TokenPayload, error) {
 	}
 
 	// Getting ID, it's an interface{} so I need to cast it to uint
-	id := fmt.Sprintf("%v", claims["ID"])
+	id, ok := claims["ID"].(uint)
+	if !ok {
+		return nil, errors.New("empty name")
+	}
 
 	return &TokenPayload{
 		ID: id,
