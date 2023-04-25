@@ -1,11 +1,9 @@
 package main
 
-import (
-	"github.com/alejmendez/goApiRest/core"
-)
+import "github.com/alejmendez/goApiRest/bootstrap"
 
 func main() {
-	app, _ := core.NewServer()
+	app := bootstrap.NewApplication()
 
 	defer app.Close()
 }

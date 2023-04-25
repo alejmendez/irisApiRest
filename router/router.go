@@ -4,13 +4,16 @@ import (
 	"github.com/alejmendez/goApiRest/app/controllers"
 	"github.com/alejmendez/goApiRest/app/repositories"
 	"github.com/alejmendez/goApiRest/app/services"
-	"github.com/alejmendez/goApiRest/core/config"
+	"github.com/alejmendez/goApiRest/core"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/jinzhu/gorm"
 )
 
-func SetupRoutes(app *fiber.App, conf *config.Config, db *gorm.DB) {
+func SetupRoutes(server *core.Server) {
+	app := server.App
+	conf := server.Conf
+	db := server.DB
+
 	api := app.Group("/api", logger.New())
 	healthController := controllers.NewHealthController(conf)
 	api.Get("/health", healthController.Get)
@@ -30,7 +33,6 @@ func SetupRoutes(app *fiber.App, conf *config.Config, db *gorm.DB) {
 	api.Post("/auth/login", authController.Login)
 
 	// Users
-
 	userApi := api.Group("/users") //.Use(middleware.Auth)
 	userApi.Get("/:id", userController.Get)
 	userApi.Post("/", userController.Create)
