@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"github.com/alejmendez/goApiRest/app/dto"
-	model "github.com/alejmendez/goApiRest/app/models"
+	model "github.com/alejmendez/goApiRest/app/model"
 	"github.com/alejmendez/goApiRest/app/services"
 	"github.com/alejmendez/goApiRest/app/utils"
 
@@ -51,7 +51,7 @@ func (c *userController) Create(ctx *fiber.Ctx) error {
 	UserRequest := new(dto.UserRequest)
 
 	if err := utils.ParseBodyAndValidate(ctx, UserRequest); err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, "Review your input")
+		return ctx.Status(fiber.StatusBadRequest).JSON(err)
 	}
 
 	user := &model.User{

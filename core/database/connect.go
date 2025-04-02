@@ -5,7 +5,8 @@ import (
 	"log"
 
 	"github.com/alejmendez/goApiRest/core/config"
-	"github.com/jinzhu/gorm"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 var (
@@ -15,7 +16,7 @@ var (
 // ConnectDB connect to db
 func ConnectDB() *gorm.DB {
 	// log.Println(GetConnectionString())
-	db, err := gorm.Open("postgres", GetConnectionString())
+	db, err := gorm.Open(postgres.Open(GetConnectionString()), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}

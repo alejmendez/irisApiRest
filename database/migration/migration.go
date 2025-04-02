@@ -3,8 +3,8 @@ package migration
 import (
 	"log"
 
-	model "github.com/alejmendez/goApiRest/app/models"
-	"github.com/jinzhu/gorm"
+	model "github.com/alejmendez/goApiRest/app/model"
+	"gorm.io/gorm"
 )
 
 func Migrate(DB *gorm.DB) {

@@ -31,9 +31,12 @@ func (aS *authServices) GenerateToken(email string, pass string) (string, error)
 		return "", errors.New("invalid password")
 	}
 
-	token := utils.JwtGenerate(&utils.TokenPayload{
+	token, err := utils.JwtGenerate(&utils.TokenPayload{
 		ID: user.ID,
 	})
+	if err != nil {
+		return "", err
+	}
 
 	return token, nil
 }

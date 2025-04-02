@@ -10,8 +10,7 @@ import (
 	"github.com/joho/godotenv"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"gorm.io/gorm"
 )
 
 type Server struct {
@@ -56,5 +55,9 @@ func (s *Server) Listen() {
 }
 
 func (s *Server) Close() {
-	s.DB.Close()
+	sqlDB, err := s.DB.DB()
+	if err != nil {
+		log.Fatal(err)
+	}
+	sqlDB.Close()
 }

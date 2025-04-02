@@ -1,9 +1,11 @@
 package repositories
 
 import (
-	model "github.com/alejmendez/goApiRest/app/models"
+	"errors"
+
+	model "github.com/alejmendez/goApiRest/app/model"
 	"github.com/alejmendez/goApiRest/app/utils"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 func NewUserRepository(db *gorm.DB) UserRepository {
@@ -29,7 +31,7 @@ type userRepository struct {
 func (uR *userRepository) ListByWhere(userW *model.User) ([]*model.User, error) {
 	var list []*model.User
 	if err := uR.Db.Where(&userW).Find(&list).Error; err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
 		return nil, err
@@ -40,7 +42,7 @@ func (uR *userRepository) ListByWhere(userW *model.User) ([]*model.User, error) 
 func (uR *userRepository) FindByWhere(userW *model.User) (*model.User, error) {
 	var user model.User
 	if err := uR.Db.Where(&userW).First(&user).Error; err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
 		return nil, err
@@ -53,8 +55,7 @@ func (uR *userRepository) FindByEmail(email string) (*model.User, error) {
 }
 
 func (uR *userRepository) Find(id string) (*model.User, error) {
-	i, _ := utils.StringToUint(id)
-	return uR.FindByWhere(&model.User{ID: i})
+	return uR.FindByWhere(&model.User{ID: id})
 }
 
 func (uR *userRepository) Create(user *model.User) (*model.User, error) {

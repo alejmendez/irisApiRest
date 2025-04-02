@@ -12,11 +12,11 @@ import (
 
 // TokenPayload defines the payload for the token
 type TokenPayload struct {
-	ID uint
+	ID string
 }
 
 // Generate generates the jwt token based on payload
-func JwtGenerate(payload *TokenPayload) string {
+func JwtGenerate(payload *TokenPayload) (string, error) {
 	v, err := time.ParseDuration(config.Conf.JwtExpiresIn)
 
 	if err != nil {
@@ -31,10 +31,10 @@ func JwtGenerate(payload *TokenPayload) string {
 	token, err := t.SignedString([]byte(config.Conf.JwtSecret))
 
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
-	return token
+	return token, nil
 }
 
 func JwtParse(token string) (*jwt.Token, error) {
@@ -68,7 +68,7 @@ func JwtVerify(token string) (*TokenPayload, error) {
 	}
 
 	// Getting ID, it's an interface{} so I need to cast it to uint
-	id, ok := claims["ID"].(uint)
+	id, ok := claims["ID"].(string)
 	if !ok {
 		return nil, errors.New("empty name")
 	}

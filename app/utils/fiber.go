@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/utils"
 )
 
 // ParseBody is helper function for parsing the body.
@@ -32,4 +33,8 @@ func ParseBodyAndValidate(ctx *fiber.Ctx, body interface{}) *fiber.Error {
 func GetCurrentUserId(c *fiber.Ctx) string {
 	id := fmt.Sprintf("%v", c.Locals("USER"))
 	return id
+}
+
+func UUIDv4() string {
+	return utils.UUIDv4()
 }

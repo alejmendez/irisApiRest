@@ -1,7 +1,7 @@
 package services
 
 import (
-	model "github.com/alejmendez/goApiRest/app/models"
+	model "github.com/alejmendez/goApiRest/app/model"
 	"github.com/alejmendez/goApiRest/app/repositories"
 	"github.com/alejmendez/goApiRest/app/utils"
 )
@@ -38,6 +38,7 @@ func (uS *userService) Get(id string) (*model.User, error) {
 }
 
 func (uS *userService) Create(user *model.User) (*model.User, error) {
+	user.ID = utils.UUIDv4()
 	return uS.repository.Create(user)
 }
 
